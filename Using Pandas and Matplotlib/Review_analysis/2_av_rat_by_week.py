@@ -2,8 +2,8 @@ import justpy as jp
 import pandas as pd
 
 data = pd.read_csv("reviews.csv", parse_dates=["Timestamp"])
-data["Day"] = data["Timestamp"].dt.date
-day_average = data.groupby(["Day"]).mean()
+data["Week"] = data["Timestamp"].dt.strftime("%Y-%U")
+week_average = data.groupby(["Week"]).mean()
 
 chart_def = """
 {
@@ -15,7 +15,7 @@ chart_def = """
         text: 'Average Rating'
     },
     subtitle: {
-        text: 'Averaged Rating by Day'
+        text: 'Averaged Rating by Week'
     },
     xAxis: {
         reversed: false,
@@ -60,20 +60,17 @@ chart_def = """
 }"""
 
 
-def by_day():
+def by_week():
     wp = jp.QuasarPage()
     # https://quasar.dev/style - for styling, etc.
     h1 = jp.QDiv(a=wp, text="Analysis of Course Reviews", classes="text-h1 text-center q-pa-md")
     p = jp.QDiv(a=wp, text="These graphs represent course review analysis")
+
     hc = jp.HighCharts(a=wp, options=chart_def)
-    # hc.options.title.text = "Average Rating by Day"
-    # x = [3, 6, 8]
-    # y = [4, 7, 9]
-    # hc.options.series[0].data = list(zip(x, y))
-    hc.options.xAxis.categories = list(day_average.index)  # Creating a new key in chart_def
-    hc.options.series[0].data = list(day_average['Rating'])
+    hc.options.xAxis.categories = list(week_average.index)
+    hc.options.series[0].data = list(week_average["Rating"])
 
     return wp
 
 
-jp.justpy(by_day)
+jp.justpy(by_week)
